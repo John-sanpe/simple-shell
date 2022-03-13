@@ -371,9 +371,11 @@ static bool readline_getcode(struct readline_state *state, char *code)
                                 return true;
 
                             default:
+                                break;
                         }
                         break;
                     default:
+                        break;
                 }
             }
             break;
