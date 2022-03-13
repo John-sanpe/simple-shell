@@ -4,12 +4,15 @@
  */
 
 #include <command.h>
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <termios.h>
-
+#include "signal_process.h"
+struct termios orgin;
 static struct sshell_command *builtin_command[] = {
     &echo_command,
     &hostname_command,
@@ -42,23 +45,33 @@ void sshell_write(const char *str, unsigned int len, void *data)
 {
     write(STDOUT_FILENO, str, len);
 }
-
+static void 
+sshell_set_orgin_termios_sig_handler(int sig) {
+    tcsetattr(STDIN_FILENO, TCSANOW, &orgin);
+    psignal(sig, NULL);
+    exit(-1);
+}
+static void 
+sshell_set_signal() {
+    sshell_singal_add(SIGSEGV, sshell_set_orgin_termios_sig_handler);
+}
 int main(int argc, char *argv[])
 {
-    struct termios info, save;
-
+    struct termios info;
+    tcgetattr(STDIN_FILENO, &orgin);
     tcgetattr(STDIN_FILENO, &info);
-    save = info;
+
     info.c_lflag &= ~(ICANON | ISIG | ECHO);
     info.c_iflag &= ~BRKINT;
     info.c_cc[VTIME] = 255;
     info.c_cc[VMIN] = 1;
     tcsetattr(STDIN_FILENO, TCSANOW, &info);
+    sshell_set_signal();
 
     builtin_init();
     sshell_init();
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &save);
+    tcsetattr(STDIN_FILENO, TCSANOW, &orgin);
 
     return 0;
 }

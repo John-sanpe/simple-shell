@@ -14,7 +14,7 @@ objs += command/pwd.o
 objs += command/rmdir.o
 objs += command/sleep.o
 objs += command/sync.o
-
+objs += src/signal_process.o
 %.o:%.c $(head)
 	@ echo -e "  \e[32mCC\e[0m	" $@
 	@ gcc -o $@ -c $< $(CFLAGS)
