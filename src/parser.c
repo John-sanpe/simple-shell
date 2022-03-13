@@ -155,7 +155,7 @@ state sshell_parser(char *cmdline, char **pos, int *argc, char ***argv)
         ++(*argc);
     }
 
-    count = *argc * sizeof(**argv);
+    count = (*argc + 1) * sizeof(**argv);
     *argv = malloc(count + (tmp - buff));
     if (!*argv) {
         free(buff);
@@ -172,6 +172,8 @@ state sshell_parser(char *cmdline, char **pos, int *argc, char ***argv)
         var++;
     }
 
+    (*argv)[count] = NULL;
     free(buff);
+
     return -ENOERR;
 }
