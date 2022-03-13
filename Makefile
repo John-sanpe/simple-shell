@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-CFLAGS := -g -Wall -Werror -I include/
+CFLAGS := -g -std=gnu11 -Wall -Werror -I include/
 
 head := sshell.h list.h macro.h
 head := $(addprefix include/, $(head))

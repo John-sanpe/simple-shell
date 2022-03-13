@@ -40,7 +40,7 @@ unsigned int sshell_read(char *str, unsigned int len, void *data)
 
 void sshell_write(const char *str, unsigned int len, void *data)
 {
-    printf(str);
+    fprintf(stdout, "%s", str);
 }
 
 int main(int argc, char *argv[])
