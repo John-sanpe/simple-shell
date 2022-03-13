@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 
 static struct sshell_command *builtin_command[] = {
@@ -34,25 +35,30 @@ static state builtin_init(void)
 
 unsigned int sshell_read(char *str, unsigned int len, void *data)
 {
-    *str = getchar();
-    return 1;
+    return read(STDIN_FILENO, str, len);
 }
 
 void sshell_write(const char *str, unsigned int len, void *data)
 {
-    fprintf(stdout, "%s", str);
+    write(STDOUT_FILENO, str, len);
 }
 
 int main(int argc, char *argv[])
 {
-    struct termios info;
+    struct termios info, save;
 
-    tcgetattr(0,&info);
-    info.c_lflag &= ~ECHO;
-    tcsetattr(0,TCSANOW,&info);
+    tcgetattr(STDIN_FILENO, &info);
+    save = info;
+    info.c_lflag &= ~(ICANON | ISIG | ECHO);
+    info.c_iflag &= ~BRKINT;
+    info.c_cc[VTIME] = 255;
+    info.c_cc[VMIN] = 1;
+    tcsetattr(STDIN_FILENO, TCSANOW, &info);
 
     builtin_init();
     sshell_init();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &save);
 
     return 0;
 }
